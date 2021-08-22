@@ -1,54 +1,110 @@
 package com.japharr.referral.repository;
 
 import com.japharr.referral.entity.Member;
+import com.japharr.referral.entity.Member_;
 import com.japharr.referral.exception.NotFoundException;
-import io.vertx.core.Future;
-import io.vertx.pgclient.PgPool;
-import io.vertx.sqlclient.Row;
-import io.vertx.sqlclient.RowIterator;
-import io.vertx.sqlclient.RowSet;
-import io.vertx.sqlclient.Tuple;
+import io.smallrye.mutiny.Uni;
+import org.hibernate.reactive.mutiny.Mutiny;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaDelete;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
+import java.util.Objects;
 
 public class MemberRepository {
-  private final PgPool client;
-  private static final Function<Row, Member> MAPPER = row ->
-    Member.builder()
-      .id(row.getLong("id"))
-      .name(row.getString("name"))
-      .email(row.getString("email"))
-      .build();
+  private final Mutiny.SessionFactory sessionFactory;
 
-
-  private MemberRepository(PgPool client) {
-    this.client = client;
+  private MemberRepository(Mutiny.SessionFactory sessionFactory) {
+    this.sessionFactory = sessionFactory;
   }
 
-  public static MemberRepository instance(PgPool client) {
-    return new MemberRepository(client);
+  public static MemberRepository instance(Mutiny.SessionFactory sessionFactory) {
+    return new MemberRepository(sessionFactory);
   }
 
-  public Future<List<Member>> findAll() {
-    return client.query("SELECT * FROM members")
-      .execute()
-      .map(rows -> StreamSupport.stream(rows.spliterator(), false)
-        .map(MAPPER)
-        .collect(Collectors.toList()));
+  public Uni<List<Member>> findAll() {
+    CriteriaBuilder cb = sessionFactory.getCriteriaBuilder();
+    CriteriaQuery<Member> query = cb.createQuery(Member.class);
+    Root<Member> root = query.from(Member.class);
+    return this.sessionFactory.withSession(session -> session.createQuery(query).getResultList());
   }
 
-  public Future<Member> findById(long id) {
-    return client.preparedQuery("SELECT * FROM members WHERE id=$1")
-      .execute(Tuple.of(id))
-      .map(RowSet::iterator)
-      .map((RowIterator<Row> it) -> {
-        if(it.hasNext()) {
-          return MAPPER.apply(it.next());
-        }
-        else throw new NotFoundException(id);
-      });
+  public Uni<List<Member>> findByKeyword(String q, int offset, int limit) {
+    CriteriaBuilder cb = this.sessionFactory.getCriteriaBuilder();
+    // create query
+    CriteriaQuery<Member> query = cb.createQuery(Member.class);
+    // set the root class
+    Root<Member> root = query.from(Member.class);
+
+    // if keyword is provided
+    if (q != null && !q.trim().isEmpty()) {
+      query.where(
+        cb.or(
+          cb.like(root.get(Member_.name), "%" + q + "%"),
+          cb.like(root.get(Member_.email), "%" + q + "%")
+        )
+      );
+    }
+    //perform query
+    return this.sessionFactory.withSession(session -> session.createQuery(query)
+      .setFirstResult(offset)
+      .setMaxResults(limit)
+      .getResultList());
+  }
+
+
+  public Uni<Member> findById(Long id) {
+    Objects.requireNonNull(id, "id can not be null");
+    return this.sessionFactory.withSession(session -> session.find(Member.class, id))
+      .onItem().ifNull().failWith(() -> new NotFoundException(id));
+  }
+
+  public Uni<Member> save(Member merchant) {
+    if(merchant.getId() == null) {
+      return this.sessionFactory.withSession(session ->
+        session.persist(merchant)
+          .chain(session::flush)
+          .replaceWith(merchant));
+    } else {
+      return this.sessionFactory.withSession(session ->
+        session.merge(merchant)
+          .onItem().call(session::flush)
+      );
+    }
+  }
+
+  public Uni<Member[]> saveAll(List<Member> data) {
+    Member[] array = data.toArray(new Member[0]);
+    return this.sessionFactory.withSession(session -> {
+      session.persistAll(array);
+      session.flush();
+      return Uni.createFrom().item(array);
+    });
+  }
+
+  public Uni<Integer> deleteById(Long id) {
+    CriteriaBuilder cb = this.sessionFactory.getCriteriaBuilder();
+    CriteriaDelete<Member> delete = cb.createCriteriaDelete(Member.class);
+    Root<Member> root = delete.from(Member.class);
+    // set where clause
+    delete.where(cb.equal(root.get(Member_.id), id));
+    // perform update
+    return this.sessionFactory.withTransaction((session, tx) ->
+      session.createQuery(delete).executeUpdate()
+    );
+  }
+
+  public Uni<Integer> deleteAll() {
+    CriteriaBuilder cb = this.sessionFactory.getCriteriaBuilder();
+    // create delete
+    CriteriaDelete<Member> delete = cb.createCriteriaDelete(Member.class);
+    // set the root class
+    Root<Member> root = delete.from(Member.class);
+    // perform update
+    return this.sessionFactory.withTransaction((session, tx) ->
+      session.createQuery(delete).executeUpdate()
+    );
   }
 }

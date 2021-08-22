@@ -1,7 +1,9 @@
 package com.japharr.referral;
 
+import com.japharr.referral.handler.MemberHandler;
 import com.japharr.referral.handler.MerchantHandler;
 import com.japharr.referral.handler.ProductHandler;
+import com.japharr.referral.repository.MemberRepository;
 import com.japharr.referral.repository.MerchantRepository;
 import com.japharr.referral.repository.ProductRepository;
 import io.smallrye.mutiny.Uni;
@@ -28,13 +30,18 @@ public class MainVerticle extends AbstractVerticle {
     ProductRepository productRepository = ProductRepository.instance(emf);
     ProductHandler productHandler = ProductHandler.instance(productRepository);
 
+    MemberRepository memberRepository = MemberRepository.instance(emf);
+    MemberHandler memberHandler = MemberHandler.instance(memberRepository);
+
     // Configure routes
     var router = routes(merchantHandler);
     var productRoutes = productRoutes(productHandler);
+    var memberRoutes = memberRoutes(memberHandler);
 
     Uni<HttpServer> startHttpServer = vertx.createHttpServer()
       .requestHandler(router::handle)
       .requestHandler(productRoutes::handle)
+      .requestHandler(memberRoutes::handle)
       .listen(8088)
       .onItem().invoke(() -> System.out.println("✅ HTTP server listening on port 8080"))
       .onFailure().invoke(Throwable::printStackTrace);
@@ -85,6 +92,30 @@ public class MainVerticle extends AbstractVerticle {
       .respond(productHandler::update);
     router.delete("/products/:id")
       .respond(productHandler::delete);
+
+    return router;
+  }
+
+  private Router memberRoutes(MemberHandler memberHandler) {
+    // Create a Router
+    Router router = Router.router(vertx);
+    // register BodyHandler globally.
+    //router.route().handler(BodyHandler.create());
+
+    router.get("/members").produces("application/json")
+      .respond(memberHandler::all);
+    router.get("/members/:id").produces("application/json")
+      .respond(memberHandler::get)
+      .failureHandler(frc -> frc.response().setStatusCode(404).endAndAwait(frc.failure().getMessage()));
+    router.post("/members").consumes("application/json")
+      .handler(BodyHandler.create())
+      .respond(memberHandler::save)
+      .failureHandler(frc -> frc.response().setStatusCode(404).endAndAwait(frc.failure().getMessage()));
+    router.put("/members/:id").consumes("application/json")
+      .handler(BodyHandler.create())
+      .respond(memberHandler::update);
+    router.delete("/members/:id")
+      .respond(memberHandler::delete);
 
     return router;
   }
