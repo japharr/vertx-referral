@@ -54,11 +54,27 @@ public class MemberRepository {
       .getResultList());
   }
 
-
   public Uni<Member> findById(Long id) {
     Objects.requireNonNull(id, "id can not be null");
     return this.sessionFactory.withSession(session -> session.find(Member.class, id))
       .onItem().ifNull().failWith(() -> new NotFoundException(id));
+  }
+
+  public Uni<Member> findByReferralCode(String referralCode) {
+    if(referralCode == null) return Uni.createFrom().nullItem();
+
+    Objects.requireNonNull(referralCode, "referralCode can not be null");
+    CriteriaBuilder cb = this.sessionFactory.getCriteriaBuilder();
+    // create query
+    CriteriaQuery<Member> query = cb.createQuery(Member.class);
+    // set the root class
+    Root<Member> root = query.from(Member.class);
+    query.where(
+      cb.equal(root.get(Member_.referralCode), referralCode)
+    );
+    return this.sessionFactory.withSession(session ->
+        session.createQuery(query).getSingleResult())
+      .onItem().ifNull().failWith(() -> new NotFoundException(referralCode));
   }
 
   public Uni<Member> save(Member merchant) {

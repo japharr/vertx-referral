@@ -5,11 +5,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import javax.persistence.Embeddable;
 import java.io.Serializable;
 
 @Setter @Getter
-@AllArgsConstructor
+@AllArgsConstructor(staticName = "of")
 @NoArgsConstructor
+@Embeddable
 public class MemberProductPK implements Serializable {
   private Long memberId;
   private Long productId;

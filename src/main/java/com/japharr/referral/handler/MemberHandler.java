@@ -41,6 +41,8 @@ public class MemberHandler {
     return this.repository
       .save(Member.builder()
         .name(form.getName())
+        .email(form.getEmail())
+        .referralCode(form.getReferralCode())
         .build()
       )
       .onItem().invoke(saved -> rc.response()
@@ -61,6 +63,7 @@ public class MemberHandler {
         post -> {
           post.setName(form.getName());
           post.setEmail(form.getEmail());
+          post.setReferralCode(form.getReferralCode());
           return this.repository.save(post);
         }
       )

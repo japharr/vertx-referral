@@ -19,11 +19,14 @@ public class Member {
   @GeneratedValue
   private Long id;
 
-  @Column(unique = true, nullable = false)
+  @Column(nullable = false)
   private String name;
 
   @Column(unique = true)
   private String email;
+
+  @Column(name = "referral_code", unique = true)
+  private String referralCode;
 
   @Override
   public boolean equals(Object o) {

@@ -1,11 +1,14 @@
 package com.japharr.referral;
 
 import com.japharr.referral.handler.MemberHandler;
+import com.japharr.referral.handler.MemberProductHandler;
 import com.japharr.referral.handler.MerchantHandler;
 import com.japharr.referral.handler.ProductHandler;
+import com.japharr.referral.repository.MemberProductRepository;
 import com.japharr.referral.repository.MemberRepository;
 import com.japharr.referral.repository.MerchantRepository;
 import com.japharr.referral.repository.ProductRepository;
+import com.japharr.referral.service.MemberProductService;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.vertx.core.AbstractVerticle;
 import io.vertx.mutiny.core.http.HttpServer;
@@ -33,15 +36,20 @@ public class MainVerticle extends AbstractVerticle {
     MemberRepository memberRepository = MemberRepository.instance(emf);
     MemberHandler memberHandler = MemberHandler.instance(memberRepository);
 
+    MemberProductRepository memberProductRepository = MemberProductRepository.instance(emf);
+    MemberProductService memberProductService = MemberProductService.of(memberRepository, productRepository, memberProductRepository);
+    MemberProductHandler memberProductHandler = MemberProductHandler.instance(memberProductService);
+
+    Router router = Router.router(vertx);
+
     // Configure routes
-    var router = routes(merchantHandler);
-    var productRoutes = productRoutes(productHandler);
-    var memberRoutes = memberRoutes(memberHandler);
+    var merchantRoutes = routes(router, merchantHandler);
+    var productRoutes = productRoutes(router, productHandler);
+    var memberRoutes = memberRoutes(router, memberHandler);
+    var memberProductRoutes = memberProductRoute(router, memberProductHandler);
 
     Uni<HttpServer> startHttpServer = vertx.createHttpServer()
-      .requestHandler(router::handle)
-      .requestHandler(productRoutes::handle)
-      .requestHandler(memberRoutes::handle)
+      .requestHandler(router)
       .listen(8088)
       .onItem().invoke(() -> System.out.println("✅ HTTP server listening on port 8080"))
       .onFailure().invoke(Throwable::printStackTrace);
@@ -49,9 +57,8 @@ public class MainVerticle extends AbstractVerticle {
     return startHttpServer.replaceWithVoid();
   }
 
-  private Router routes(MerchantHandler merchantHandler) {
+  private Router routes(Router router, MerchantHandler merchantHandler) {
     // Create a Router
-    Router router = Router.router(vertx);
     // register BodyHandler globally.
     //router.route().handler(BodyHandler.create());
 
@@ -69,12 +76,13 @@ public class MainVerticle extends AbstractVerticle {
       .handler(merchantHandler::update);
     router.delete("/merchants/:id")
       .handler(merchantHandler::delete);
+
     return router;
   }
 
-  private Router productRoutes(ProductHandler productHandler) {
+  private Router productRoutes(Router router, ProductHandler productHandler) {
     // Create a Router
-    Router router = Router.router(vertx);
+//    Router router = Router.router(vertx);
     // register BodyHandler globally.
     //router.route().handler(BodyHandler.create());
 
@@ -96,9 +104,8 @@ public class MainVerticle extends AbstractVerticle {
     return router;
   }
 
-  private Router memberRoutes(MemberHandler memberHandler) {
+  private Router memberRoutes(Router router, MemberHandler memberHandler) {
     // Create a Router
-    Router router = Router.router(vertx);
     // register BodyHandler globally.
     //router.route().handler(BodyHandler.create());
 
@@ -116,6 +123,17 @@ public class MainVerticle extends AbstractVerticle {
       .respond(memberHandler::update);
     router.delete("/members/:id")
       .respond(memberHandler::delete);
+
+    return router;
+  }
+
+  private Router memberProductRoute(Router router, MemberProductHandler memberProductHandler) {
+    router.get("/products/:productId/members").produces("application/json")
+      .respond(memberProductHandler::findByProductId);
+    router.post("/products/:productId/members").consumes("application/json")
+      .handler(BodyHandler.create())
+      .respond(memberProductHandler::save)
+      .failureHandler(frc -> frc.response().setStatusCode(404).endAndAwait(frc.failure().getMessage()));
 
     return router;
   }
