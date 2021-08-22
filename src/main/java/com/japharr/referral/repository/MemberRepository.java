@@ -17,11 +17,12 @@ import java.util.stream.StreamSupport;
 public class MemberRepository {
   private final PgPool client;
   private static final Function<Row, Member> MAPPER = row ->
-    new Member(
-      row.getLong("id"),
-      row.getString("email"),
-      row.getString("title")
-    );
+    Member.builder()
+      .id(row.getLong("id"))
+      .name(row.getString("name"))
+      .email(row.getString("email"))
+      .build();
+
 
   private MemberRepository(PgPool client) {
     this.client = client;
