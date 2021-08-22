@@ -1,6 +1,7 @@
 package com.japharr.referral.repository;
 
 import com.japharr.referral.entity.Product;
+import com.japharr.referral.entity.Product_;
 import com.japharr.referral.exception.NotFoundException;
 import io.smallrye.mutiny.Uni;
 import org.hibernate.reactive.mutiny.Mutiny;
@@ -29,6 +30,29 @@ public class ProductRepository {
     Root<Product> root = query.from(Product.class);
     return this.sessionFactory.withSession(session -> session.createQuery(query).getResultList());
   }
+
+  public Uni<List<Product>> findByKeyword(String q, int offset, int limit) {
+    CriteriaBuilder cb = this.sessionFactory.getCriteriaBuilder();
+    // create query
+    CriteriaQuery<Product> query = cb.createQuery(Product.class);
+    // set the root class
+    Root<Product> root = query.from(Product.class);
+
+    // if keyword is provided
+    if (q != null && !q.trim().isEmpty()) {
+      query.where(
+        cb.or(
+          cb.like(root.get(Product_.name), "%" + q + "%")
+        )
+      );
+    }
+    //perform query
+    return this.sessionFactory.withSession(session -> session.createQuery(query)
+      .setFirstResult(offset)
+      .setMaxResults(limit)
+      .getResultList());
+  }
+
 
   public Uni<Product> findById(Long id) {
     Objects.requireNonNull(id, "id can not be null");
@@ -64,7 +88,7 @@ public class ProductRepository {
     CriteriaDelete<Product> delete = cb.createCriteriaDelete(Product.class);
     Root<Product> root = delete.from(Product.class);
     // set where clause
-    delete.where(cb.equal(root.get("id"), id));
+    delete.where(cb.equal(root.get(Product_.id), id));
     // perform update
     return this.sessionFactory.withTransaction((session, tx) ->
       session.createQuery(delete).executeUpdate()

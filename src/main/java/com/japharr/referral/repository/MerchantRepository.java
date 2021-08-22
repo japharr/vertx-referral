@@ -1,6 +1,7 @@
 package com.japharr.referral.repository;
 
 import com.japharr.referral.entity.Merchant;
+import com.japharr.referral.entity.Merchant_;
 import com.japharr.referral.exception.NotFoundException;
 import io.smallrye.mutiny.Uni;
 import org.hibernate.reactive.mutiny.Mutiny;
@@ -29,6 +30,30 @@ public class MerchantRepository {
     Root<Merchant> root = query.from(Merchant.class);
     return this.sessionFactory.withSession(session -> session.createQuery(query).getResultList());
   }
+
+  public Uni<List<Merchant>> findByKeyword(String q, int offset, int limit) {
+    CriteriaBuilder cb = this.sessionFactory.getCriteriaBuilder();
+    // create query
+    CriteriaQuery<Merchant> query = cb.createQuery(Merchant.class);
+    // set the root class
+    Root<Merchant> root = query.from(Merchant.class);
+
+    // if keyword is provided
+    if (q != null && !q.trim().isEmpty()) {
+      query.where(
+        cb.or(
+          cb.like(root.get(Merchant_.name), "%" + q + "%"),
+          cb.like(root.get(Merchant_.email), "%" + q + "%")
+        )
+      );
+    }
+    //perform query
+    return this.sessionFactory.withSession(session -> session.createQuery(query)
+      .setFirstResult(offset)
+      .setMaxResults(limit)
+      .getResultList());
+  }
+
 
   public Uni<Merchant> findById(Long id) {
     Objects.requireNonNull(id, "id can not be null");
@@ -64,7 +89,7 @@ public class MerchantRepository {
     CriteriaDelete<Merchant> delete = cb.createCriteriaDelete(Merchant.class);
     Root<Merchant> root = delete.from(Merchant.class);
     // set where clause
-    delete.where(cb.equal(root.get("id"), id));
+    delete.where(cb.equal(root.get(Merchant_.id), id));
     // perform update
     return this.sessionFactory.withTransaction((session, tx) ->
       session.createQuery(delete).executeUpdate()
