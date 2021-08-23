@@ -1,7 +1,6 @@
-package com.japharr.referral.handler;
+package com.japharr.referral.web.handler;
 
 import com.japharr.referral.entity.MemberProduct;
-import com.japharr.referral.entity.Product;
 import com.japharr.referral.model.MemberProductDto;
 import com.japharr.referral.service.MemberProductService;
 import io.smallrye.mutiny.Uni;

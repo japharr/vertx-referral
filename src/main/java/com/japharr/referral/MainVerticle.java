@@ -1,9 +1,9 @@
 package com.japharr.referral;
 
-import com.japharr.referral.handler.MemberHandler;
-import com.japharr.referral.handler.MemberProductHandler;
-import com.japharr.referral.handler.MerchantHandler;
-import com.japharr.referral.handler.ProductHandler;
+import com.japharr.referral.web.handler.MemberHandler;
+import com.japharr.referral.web.handler.MemberProductHandler;
+import com.japharr.referral.web.handler.MerchantHandler;
+import com.japharr.referral.web.handler.ProductHandler;
 import com.japharr.referral.repository.MemberProductRepository;
 import com.japharr.referral.repository.MemberRepository;
 import com.japharr.referral.repository.MerchantRepository;

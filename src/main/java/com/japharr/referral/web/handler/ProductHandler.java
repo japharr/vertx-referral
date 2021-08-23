@@ -1,4 +1,4 @@
-package com.japharr.referral.handler;
+package com.japharr.referral.web.handler;
 
 import com.japharr.referral.entity.Product;
 import com.japharr.referral.repository.ProductRepository;

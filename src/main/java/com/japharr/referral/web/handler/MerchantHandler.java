@@ -1,8 +1,7 @@
-package com.japharr.referral.handler;
+package com.japharr.referral.web.handler;
 
 import com.japharr.referral.entity.Merchant;
 import com.japharr.referral.repository.MerchantRepository;
-import io.smallrye.mutiny.Uni;
 import io.vertx.core.json.Json;
 import io.vertx.mutiny.ext.web.RoutingContext;
 import java.util.logging.Level;
