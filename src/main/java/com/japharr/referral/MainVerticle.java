@@ -29,21 +29,18 @@ public class MainVerticle extends AbstractVerticle {
   public Uni<Void> asyncStart() {
     Router router = Router.router(vertx);
 
-    router.get("/hello")
-      //.handler(rc -> Uni.createFrom().item("Hello from my route").subscribe().with(r-> rc.response().endAndForget(r)));
-      //.handler(rc -> rc.response().endAndForget("Hello from my route"));
-      .respond(rc -> Uni.createFrom().item("Hello from my route"));
-
     // Configure routes
     router = (RouteBuilder.of(router))
       .addRoute(MerchantRoute.of(merchantHandler))
       .addRoute(MemberRoute.of(memberHandler))
       .addRoute(ProductRoute.of(productHandler))
       .addRoute(MemberProductRoute.of(memberProductHandler))
+      .addRoute(routeBuilder -> {
+        routeBuilder.getRouter().get("/hello")
+          .respond(rc -> Uni.createFrom().item("Hello from my route"));
+        return routeBuilder;
+      })
       .getRouter();
-
-    //router.get("/hello").handler(rc -> rc.response().endAndAwait("Hello from my route"));
-    //router.get("/hello").handler(rc -> rc.response().end("Hello from my route"));
 
     Uni<HttpServer> startHttpServer = vertx.createHttpServer()
       .requestHandler(router)
