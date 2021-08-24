@@ -76,4 +76,26 @@ public class TestMainVerticle {
         }
       );
   }
+
+  @Test
+  void testGetAll(VertxTestContext testContext) {
+    LOGGER.log(Level.INFO, "running test: {0}", "testGetAll");
+    client.request(HttpMethod.GET, "/products")
+      .flatMap(HttpClientRequest::send)
+      .flatMap(HttpClientResponse::body)
+      .subscribe()
+      .with(buffer ->
+          testContext.verify(
+            () -> {
+              LOGGER.log(Level.INFO, "response buffer: {0}", new Object[]{buffer.toString()});
+              assertThat(buffer.toJsonArray().size()).isEqualTo(0);
+              testContext.completeNow();
+            }
+          ),
+        e -> {
+          LOGGER.log(Level.ALL, "error: {0}", e.getMessage());
+          testContext.failNow(e);
+        }
+      );
+  }
 }
