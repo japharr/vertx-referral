@@ -20,6 +20,14 @@ public class MemberProduct {
   private MemberProductPK id;
   private BigDecimal point = BigDecimal.ZERO;
 
+  @ManyToOne(targetEntity = Member.class)
+  @JoinColumn(name = "member_id", insertable = false, updatable = false)
+  private Member member;
+
+  @ManyToOne(targetEntity = Product.class)
+  @JoinColumn(name = "product_id", insertable = false, updatable = false)
+  private Product product;
+
   @ManyToOne(targetEntity = MemberProduct.class, cascade = MERGE)
   private MemberProduct parent;
 }
