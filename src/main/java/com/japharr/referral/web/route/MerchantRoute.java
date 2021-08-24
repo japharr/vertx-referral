@@ -1,11 +1,11 @@
 package com.japharr.referral.web.route;
 
-import com.japharr.referral.model.RouterBean;
+import com.japharr.referral.utils.RouteBuilder;
 import com.japharr.referral.web.handler.MerchantHandler;
 import io.vertx.mutiny.ext.web.Router;
 import io.vertx.mutiny.ext.web.handler.BodyHandler;
 
-public class MerchantRoute implements RouterBean.Routing {
+public class MerchantRoute implements RouteBuilder.Routing {
   private final MerchantHandler merchantHandler;
 
   private MerchantRoute(MerchantHandler merchantHandler) {
@@ -17,7 +17,7 @@ public class MerchantRoute implements RouterBean.Routing {
   }
 
   @Override
-  public RouterBean routes(RouterBean bean) {
+  public RouteBuilder routes(RouteBuilder bean) {
     Router router = bean.getRouter();
 
     router.get("/merchants").produces("application/json")

@@ -1,6 +1,6 @@
 package com.japharr.referral;
 
-import com.japharr.referral.model.RouterBean;
+import com.japharr.referral.utils.RouteBuilder;
 import com.japharr.referral.web.handler.MemberHandler;
 import com.japharr.referral.web.handler.MemberProductHandler;
 import com.japharr.referral.web.handler.MerchantHandler;
@@ -16,10 +16,8 @@ import com.japharr.referral.web.route.MerchantRoute;
 import com.japharr.referral.web.route.ProductRoute;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.vertx.core.AbstractVerticle;
-import io.vertx.core.json.Json;
 import io.vertx.mutiny.core.http.HttpServer;
 import io.vertx.mutiny.ext.web.Router;
-import io.vertx.mutiny.ext.web.handler.BodyHandler;
 import org.hibernate.reactive.mutiny.Mutiny;
 
 import javax.persistence.Persistence;
@@ -54,11 +52,11 @@ public class MainVerticle extends AbstractVerticle {
       .respond(rc -> Uni.createFrom().item("Hello from my route"));
 
     // Configure routes
-    router = (RouterBean.instance(router))
-      .addRoutes(MerchantRoute.instance(merchantHandler))
-      .addRoutes(MemberRoute.instance(memberHandler))
-      .addRoutes(ProductRoute.instance(productHandler))
-      .addRoutes(MemberProductRoute.instance(memberProductHandler))
+    router = (RouteBuilder.instance(router))
+      .addRoute(MerchantRoute.instance(merchantHandler))
+      .addRoute(MemberRoute.instance(memberHandler))
+      .addRoute(ProductRoute.instance(productHandler))
+      .addRoute(MemberProductRoute.instance(memberProductHandler))
       .getRouter();
 
     //router.get("/hello").handler(rc -> rc.response().endAndAwait("Hello from my route"));
