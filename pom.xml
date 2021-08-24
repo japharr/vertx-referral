@@ -154,6 +154,14 @@
       <groupId>org.springframework</groupId>
       <artifactId>spring-test</artifactId>
     </dependency>
+
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-resolver-dns-native-macos</artifactId>
+      <scope>runtime</scope>
+      <classifier>osx-x86_64</classifier>
+      <version>4.1.67.Final</version>
+    </dependency>
   </dependencies>
 
   <build>
