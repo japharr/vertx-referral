@@ -1,23 +1,17 @@
 package com.japharr.referral.web.route;
 
-import com.japharr.referral.model.RouterBean;
+import com.japharr.referral.utils.RouteBuilder;
 import com.japharr.referral.web.handler.MemberProductHandler;
 import io.vertx.mutiny.ext.web.Router;
 import io.vertx.mutiny.ext.web.handler.BodyHandler;
+import lombok.RequiredArgsConstructor;
 
-public class MemberProductRoute implements RouterBean.Routing {
+@RequiredArgsConstructor(staticName = "of")
+public class MemberProductRoute implements RouteBuilder.Routing {
   private final MemberProductHandler handler;
 
-  private MemberProductRoute(MemberProductHandler handler) {
-    this.handler = handler;
-  }
-
-  public static MemberProductRoute instance(MemberProductHandler handler) {
-    return new MemberProductRoute(handler);
-  }
-
   @Override
-  public RouterBean routes(RouterBean bean) {
+  public RouteBuilder routes(RouteBuilder bean) {
     Router router = bean.getRouter();
 
     router.get("/products/:productId/members").produces("application/json")

@@ -1,23 +1,17 @@
 package com.japharr.referral.web.route;
 
-import com.japharr.referral.model.RouterBean;
+import com.japharr.referral.utils.RouteBuilder;
 import com.japharr.referral.web.handler.MerchantHandler;
 import io.vertx.mutiny.ext.web.Router;
 import io.vertx.mutiny.ext.web.handler.BodyHandler;
+import lombok.RequiredArgsConstructor;
 
-public class MerchantRoute implements RouterBean.Routing {
+@RequiredArgsConstructor(staticName = "of")
+public class MerchantRoute implements RouteBuilder.Routing {
   private final MerchantHandler merchantHandler;
 
-  private MerchantRoute(MerchantHandler merchantHandler) {
-    this.merchantHandler = merchantHandler;
-  }
-
-  public static MerchantRoute instance(MerchantHandler merchantHandler) {
-    return new MerchantRoute(merchantHandler);
-  }
-
   @Override
-  public RouterBean routes(RouterBean bean) {
+  public RouteBuilder routes(RouteBuilder bean) {
     Router router = bean.getRouter();
 
     router.get("/merchants").produces("application/json")
