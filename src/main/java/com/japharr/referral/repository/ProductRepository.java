@@ -4,7 +4,9 @@ import com.japharr.referral.entity.Product;
 import com.japharr.referral.entity.Product_;
 import com.japharr.referral.exception.NotFoundException;
 import io.smallrye.mutiny.Uni;
+import lombok.RequiredArgsConstructor;
 import org.hibernate.reactive.mutiny.Mutiny;
+import org.springframework.stereotype.Component;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaDelete;
@@ -13,16 +15,10 @@ import javax.persistence.criteria.Root;
 import java.util.List;
 import java.util.Objects;
 
+@Component
+@RequiredArgsConstructor
 public class ProductRepository {
   private final Mutiny.SessionFactory sessionFactory;
-
-  private ProductRepository(Mutiny.SessionFactory sessionFactory) {
-    this.sessionFactory = sessionFactory;
-  }
-
-  public static ProductRepository instance(Mutiny.SessionFactory sessionFactory) {
-    return new ProductRepository(sessionFactory);
-  }
 
   public Uni<List<Product>> findAll() {
     CriteriaBuilder cb = sessionFactory.getCriteriaBuilder();

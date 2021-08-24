@@ -5,23 +5,19 @@ import com.japharr.referral.repository.ProductRepository;
 import io.smallrye.mutiny.Uni;
 import io.vertx.core.json.Json;
 import io.vertx.mutiny.ext.web.RoutingContext;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+@Component
+@RequiredArgsConstructor
 public class ProductHandler {
   private static final Logger LOGGER = Logger.getLogger(ProductHandler.class.getSimpleName());
 
   private final ProductRepository repository;
-
-  private ProductHandler(ProductRepository repository) {
-    this.repository = repository;
-  }
-
-  public static ProductHandler instance(ProductRepository repository) {
-    return new ProductHandler(repository);
-  }
 
   public Uni<List<Product>> all(RoutingContext rc) {
     return this.repository.findAll();

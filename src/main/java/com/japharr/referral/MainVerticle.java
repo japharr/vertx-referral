@@ -20,32 +20,23 @@ import io.vertx.core.json.Json;
 import io.vertx.mutiny.core.http.HttpServer;
 import io.vertx.mutiny.ext.web.Router;
 import io.vertx.mutiny.ext.web.handler.BodyHandler;
+import lombok.RequiredArgsConstructor;
 import org.hibernate.reactive.mutiny.Mutiny;
+import org.springframework.stereotype.Component;
 
 import javax.persistence.Persistence;
 
+@Component
+@RequiredArgsConstructor
 public class MainVerticle extends AbstractVerticle {
+
+  private final MerchantHandler merchantHandler;
+  private final MemberProductHandler memberProductHandler;
+  private final MemberHandler memberHandler;
+  private final ProductHandler productHandler;
 
   @Override
   public Uni<Void> asyncStart() {
-
-    Mutiny.SessionFactory emf = Persistence
-      .createEntityManagerFactory("pg-demo")
-      .unwrap(Mutiny.SessionFactory.class);
-
-    MerchantRepository merchantRepository = MerchantRepository.instance(emf);
-    MerchantHandler merchantHandler = MerchantHandler.instance(merchantRepository);
-
-    ProductRepository productRepository = ProductRepository.instance(emf);
-    ProductHandler productHandler = ProductHandler.instance(productRepository);
-
-    MemberRepository memberRepository = MemberRepository.instance(emf);
-    MemberHandler memberHandler = MemberHandler.instance(memberRepository);
-
-    MemberProductRepository memberProductRepository = MemberProductRepository.instance(emf);
-    MemberProductService memberProductService = MemberProductService.of(memberRepository, productRepository, memberProductRepository);
-    MemberProductHandler memberProductHandler = MemberProductHandler.instance(memberProductService);
-
     Router router = Router.router(vertx);
 
     router.get("/hello")

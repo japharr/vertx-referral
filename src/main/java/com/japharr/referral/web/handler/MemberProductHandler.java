@@ -5,19 +5,15 @@ import com.japharr.referral.model.MemberProductDto;
 import com.japharr.referral.service.MemberProductService;
 import io.smallrye.mutiny.Uni;
 import io.vertx.mutiny.ext.web.RoutingContext;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@Component
+@RequiredArgsConstructor
 public class MemberProductHandler {
   private final MemberProductService memberProductService;
-
-  private MemberProductHandler(MemberProductService memberProductService) {
-    this.memberProductService = memberProductService;
-  }
-
-  public static MemberProductHandler instance(MemberProductService memberProductService) {
-    return new MemberProductHandler(memberProductService);
-  }
 
   public Uni<List<MemberProduct>> all(RoutingContext rc) {
     return this.memberProductService.findAll();

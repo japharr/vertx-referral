@@ -8,18 +8,15 @@ import com.japharr.referral.repository.MemberProductRepository;
 import com.japharr.referral.repository.MemberRepository;
 import com.japharr.referral.repository.ProductRepository;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.tuples.Tuple2;
 import io.smallrye.mutiny.tuples.Tuple3;
 import lombok.AllArgsConstructor;
-import org.hibernate.reactive.mutiny.Mutiny;
+import org.springframework.stereotype.Component;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 import java.math.BigDecimal;
 import java.util.List;
 
-@AllArgsConstructor(staticName = "of")
+@Component
+@AllArgsConstructor
 public class MemberProductService {
   private final MemberRepository memberRepository;
   private final ProductRepository productRepository;

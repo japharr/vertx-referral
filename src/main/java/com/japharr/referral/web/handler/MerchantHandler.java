@@ -4,21 +4,18 @@ import com.japharr.referral.entity.Merchant;
 import com.japharr.referral.repository.MerchantRepository;
 import io.vertx.core.json.Json;
 import io.vertx.mutiny.ext.web.RoutingContext;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+@Component
+@RequiredArgsConstructor
 public class MerchantHandler {
   private static final Logger LOGGER = Logger.getLogger(MerchantHandler.class.getSimpleName());
 
   private final MerchantRepository repository;
-
-  private MerchantHandler(MerchantRepository repository) {
-    this.repository = repository;
-  }
-
-  public static MerchantHandler instance(MerchantRepository merchantRepository) {
-    return new MerchantHandler(merchantRepository);
-  }
 
   public void all(RoutingContext rc) {
     this.repository.findAll()

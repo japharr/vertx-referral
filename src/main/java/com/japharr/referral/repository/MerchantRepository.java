@@ -4,7 +4,9 @@ import com.japharr.referral.entity.Merchant;
 import com.japharr.referral.entity.Merchant_;
 import com.japharr.referral.exception.NotFoundException;
 import io.smallrye.mutiny.Uni;
+import lombok.RequiredArgsConstructor;
 import org.hibernate.reactive.mutiny.Mutiny;
+import org.springframework.stereotype.Component;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaDelete;
@@ -13,16 +15,10 @@ import javax.persistence.criteria.Root;
 import java.util.List;
 import java.util.Objects;
 
+@Component
+@RequiredArgsConstructor
 public class MerchantRepository {
   private final Mutiny.SessionFactory sessionFactory;
-
-  private MerchantRepository(Mutiny.SessionFactory sessionFactory) {
-    this.sessionFactory = sessionFactory;
-  }
-
-  public static MerchantRepository instance(Mutiny.SessionFactory sessionFactory) {
-    return new MerchantRepository(sessionFactory);
-  }
 
   public Uni<List<Merchant>> findAll() {
     CriteriaBuilder cb = sessionFactory.getCriteriaBuilder();

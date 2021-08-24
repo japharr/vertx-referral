@@ -1,5 +1,6 @@
 package com.japharr.referral;
 
+import io.vertx.core.spi.VerticleFactory;
 import io.vertx.mutiny.core.Vertx;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpMethod;
@@ -11,6 +12,9 @@ import io.vertx.mutiny.core.http.HttpClientRequest;
 import io.vertx.mutiny.core.http.HttpClientResponse;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import java.util.concurrent.TimeUnit;
 
@@ -19,16 +23,25 @@ import java.util.logging.Logger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@SpringJUnitConfig(classes = StarterApp.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(VertxExtension.class)
 public class TestMainVerticle {
   private final static Logger LOGGER = Logger.getLogger(TestMainVerticle.class.getName());
 
+  @Autowired
+  ApplicationContext context;
+
   HttpClient client;
 
+  Vertx vertx;
+
   @BeforeEach
-  void deploy_verticle(Vertx vertx, VertxTestContext testContext) {
-    vertx.deployVerticle(new MainVerticle()).subscribe().with(
+  void deploy_verticle(VertxTestContext testContext) {
+    vertx = context.getBean(Vertx.class);
+    var factory = context.getBean(VerticleFactory.class);
+
+    vertx.deployVerticle(factory.prefix() + ":" + MainVerticle.class.getName()).subscribe().with(
       id -> {
         LOGGER.info("deployed:" + id);
         testContext.completeNow();
@@ -41,12 +54,12 @@ public class TestMainVerticle {
   }
 
   @Test
-  void verticle_deployed(Vertx vertx, VertxTestContext testContext) throws Throwable {
+  void verticle_deployed(VertxTestContext testContext) throws Throwable {
     testContext.completeNow();
   }
 
   @Test
-  public void testVertx(Vertx vertx, VertxTestContext testContext) {
+  public void testVertx(VertxTestContext testContext) {
     assertThat(vertx).isNotNull();
     testContext.completeNow();
   }
@@ -55,7 +68,7 @@ public class TestMainVerticle {
   @RepeatedTest(3)
   @Timeout(value = 10, timeUnit = TimeUnit.SECONDS)
   @DisplayName("Check the HTTP response...")
-  void testHello(Vertx vertx, VertxTestContext testContext) {
+  void testHello(VertxTestContext testContext) {
     client.request(HttpMethod.GET, "/hello")
       .flatMap(HttpClientRequest::send)
       .subscribe()

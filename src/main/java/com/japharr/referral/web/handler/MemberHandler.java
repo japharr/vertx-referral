@@ -5,23 +5,19 @@ import com.japharr.referral.repository.MemberRepository;
 import io.smallrye.mutiny.Uni;
 import io.vertx.core.json.Json;
 import io.vertx.mutiny.ext.web.RoutingContext;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+@Component
+@RequiredArgsConstructor
 public class MemberHandler {
   private static final Logger LOGGER = Logger.getLogger(MemberHandler.class.getSimpleName());
 
   private final MemberRepository repository;
-
-  private MemberHandler(MemberRepository repository) {
-    this.repository = repository;
-  }
-
-  public static MemberHandler instance(MemberRepository repository) {
-    return new MemberHandler(repository);
-  }
 
   public Uni<List<Member>> all(RoutingContext rc) {
     return this.repository.findAll();

@@ -6,7 +6,9 @@ import com.japharr.referral.entity.key.MemberProductPK;
 import com.japharr.referral.entity.key.MemberProductPK_;
 import com.japharr.referral.exception.NotFoundException;
 import io.smallrye.mutiny.Uni;
+import lombok.RequiredArgsConstructor;
 import org.hibernate.reactive.mutiny.Mutiny;
+import org.springframework.stereotype.Component;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaDelete;
@@ -15,16 +17,10 @@ import javax.persistence.criteria.Root;
 import java.util.List;
 import java.util.Objects;
 
+@Component
+@RequiredArgsConstructor
 public class MemberProductRepository {
   private final Mutiny.SessionFactory sessionFactory;
-
-  private MemberProductRepository(Mutiny.SessionFactory sessionFactory) {
-    this.sessionFactory = sessionFactory;
-  }
-
-  public static MemberProductRepository instance(Mutiny.SessionFactory sessionFactory) {
-    return new MemberProductRepository(sessionFactory);
-  }
 
   public Uni<List<MemberProduct>> findAll() {
     CriteriaBuilder cb = sessionFactory.getCriteriaBuilder();
