@@ -23,6 +23,7 @@
 
     <vertx.version>4.1.2</vertx.version>
     <junit-jupiter.version>5.7.2</junit-jupiter.version>
+    <assertj-core.version>3.20.2</assertj-core.version>
 
     <main.verticle>com.japharr.referral.MainVerticle</main.verticle>
     <launcher.class>io.vertx.core.Launcher</launcher.class>
@@ -118,6 +119,20 @@
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-engine</artifactId>
       <version>${junit-jupiter.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <version>${assertj-core.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>io.smallrye.reactive</groupId>
+      <artifactId>smallrye-mutiny-vertx-junit5</artifactId>
+      <version>${mutiny-vertx.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

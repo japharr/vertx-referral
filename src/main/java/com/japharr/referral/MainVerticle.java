@@ -16,6 +16,7 @@ import com.japharr.referral.web.route.MerchantRoute;
 import com.japharr.referral.web.route.ProductRoute;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.vertx.core.AbstractVerticle;
+import io.vertx.core.json.Json;
 import io.vertx.mutiny.core.http.HttpServer;
 import io.vertx.mutiny.ext.web.Router;
 import io.vertx.mutiny.ext.web.handler.BodyHandler;
@@ -47,6 +48,11 @@ public class MainVerticle extends AbstractVerticle {
 
     Router router = Router.router(vertx);
 
+    router.get("/hello")
+      //.handler(rc -> Uni.createFrom().item("Hello from my route").subscribe().with(r-> rc.response().endAndForget(r)));
+      //.handler(rc -> rc.response().endAndForget("Hello from my route"));
+      .respond(rc -> Uni.createFrom().item("Hello from my route"));
+
     // Configure routes
     router = (RouterBean.instance(router))
       .addRoutes(MerchantRoute.instance(merchantHandler))
@@ -55,10 +61,13 @@ public class MainVerticle extends AbstractVerticle {
       .addRoutes(MemberProductRoute.instance(memberProductHandler))
       .getRouter();
 
+    //router.get("/hello").handler(rc -> rc.response().endAndAwait("Hello from my route"));
+    //router.get("/hello").handler(rc -> rc.response().end("Hello from my route"));
+
     Uni<HttpServer> startHttpServer = vertx.createHttpServer()
       .requestHandler(router)
       .listen(8088)
-      .onItem().invoke(() -> System.out.println("✅ HTTP server listening on port 8080"))
+      .onItem().invoke(() -> System.out.println("✅ HTTP server listening on port 8088"))
       .onFailure().invoke(Throwable::printStackTrace);
 
     return startHttpServer.replaceWithVoid();
