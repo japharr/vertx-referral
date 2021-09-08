@@ -56,15 +56,15 @@ public class ProductRepository {
       .onItem().ifNull().failWith(() -> new NotFoundException(id));
   }
 
-  public Uni<Product> save(Product merchant) {
-    if(merchant.getId() == null) {
+  public Uni<Product> save(Product product) {
+    if(product.getId() == null) {
       return this.sessionFactory.withSession(session ->
-        session.persist(merchant)
+        session.persist(product)
           .chain(session::flush)
-          .replaceWith(merchant));
+          .replaceWith(product));
     } else {
       return this.sessionFactory.withSession(session ->
-          session.merge(merchant)
+          session.merge(product)
             .onItem().call(session::flush)
         );
     }

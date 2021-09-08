@@ -19,6 +19,7 @@ public class MemberProduct {
   @EmbeddedId
   private MemberProductPK id;
   private BigDecimal point = BigDecimal.ZERO;
+  private int lvl;
 
   @ManyToOne(targetEntity = Member.class)
   @JoinColumn(name = "member_id", insertable = false, updatable = false)

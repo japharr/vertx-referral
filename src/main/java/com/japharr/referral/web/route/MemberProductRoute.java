@@ -14,6 +14,10 @@ public class MemberProductRoute implements RouteBuilder.Routing {
   public RouteBuilder routes(RouteBuilder bean) {
     Router router = bean.getRouter();
 
+    router.get("/products/:productId/members-list/:memberId").produces("application/json")
+      .respond(handler::findByProductIdAndMemberId);
+    router.post("/products/:productId/members/:referralCode").produces("application/json")
+      .respond(handler::creditMember);
     router.get("/products/:productId/members").produces("application/json")
       .respond(handler::findByProductId);
     router.post("/products/:productId/members").consumes("application/json")

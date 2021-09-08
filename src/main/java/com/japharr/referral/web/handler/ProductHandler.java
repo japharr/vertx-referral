@@ -8,7 +8,12 @@ import io.vertx.mutiny.ext.web.RoutingContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -37,6 +42,10 @@ public class ProductHandler {
     return this.repository
       .save(Product.builder()
         .name(form.getName())
+        .basePoint(form.getBasePoint())
+        .sharedPoint(form.getSharedPoint())
+        .sharedPointIncludeMember(form.isSharedPointIncludeMember())
+        .sharedPointType(form.getSharedPointType())
         .build()
       )
       .onItem().invoke(saved -> rc.response()
@@ -54,9 +63,9 @@ public class ProductHandler {
     var form = body.mapTo(Product.class);
     return this.repository.findById(id)
       .flatMap(
-        post -> {
-          post.setName(form.getName());
-          return this.repository.save(post);
+        product -> {
+          product.setName(form.getName());
+          return this.repository.save(product);
         }
       )
       .onItem().invoke(updated -> rc.response()
@@ -70,7 +79,7 @@ public class ProductHandler {
     var id = Long.parseLong(params.get("id"));
     return this.repository.findById(id)
       .flatMap(
-        post -> this.repository.deleteById(id)
+        product -> this.repository.deleteById(id)
       )
       .onItem().invoke(deleted -> rc.response()
         .setStatusCode(204).end()
